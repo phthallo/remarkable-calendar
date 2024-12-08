@@ -73,6 +73,11 @@ def main(
     monthly_day_num = (toolbar + grid_start[0] + 3, grid_start[1] + 3)
     monthly_day_event = (toolbar + grid_start[0], grid_start[1] + 8)
 
+    # title 
+    title_year_range = (toolbar+20, 50.48600)
+    title = (toolbar+20, 64.48600)
+    title_header_sep = (toolbar+20, 60.48600)
+
     # Dumb fix for text y position not matching my Inkscape draft
     # exactly. Need to correct the render position by a fixed value from
     # guess-and-check. This is probably a quirk with inkscape and doesn't
@@ -121,9 +126,53 @@ def main(
     font_family = 'Gentium Plus'
     font_style = ''
 
-    pdf = FPDF('P', 'mm', 'A4')
+    pdf = FPDF('P','mm', (241,170))
     pdf.add_font(family=font_family, style=font_style, fname=font_file)
     pdf.set_font(font_family, font_style, 42)
+
+
+    # generate title page
+    pdf.add_page()
+
+    year_start = date_start.strftime('%Y')
+    year_end = date_end.strftime('%Y')
+    year_range = f"{(year_start)} - {year_end}" if year_start != year_end else year_start
+
+    # Separator line
+    pdf.set_draw_color(color_text)
+    pdf.set_font_size(22)
+
+    pdf.set_line_width(0.5)
+
+    x, y = title_header_sep
+    # 50 mm long
+    pdf.line(
+        x,
+        y,
+        x + pdf.get_string_width(year_range),
+        y,
+    )
+
+
+    # title
+    pdf.set_font_size(42)
+    pdf.set_text_color(color_text)
+
+    width = pdf.get_string_width("monthly calendar")
+
+    x, y = title
+    pdf.set_xy(x, y + fix_font_y_pos[42])
+    pdf.cell(width, text="monthly calendar", align='C')
+
+    # Year range
+    pdf.set_font_size(22)
+    pdf.set_text_color(color_text)
+
+    width = pdf.get_string_width(year_range)
+
+    x, y = title_year_range
+    pdf.set_xy(x, y + fix_font_y_pos[22])
+    pdf.cell(width, text=year_range, align='C')
 
     # eg: {'2024-10-27' : {'10': month_link, '27': day_link}}
     date_links = {}
@@ -358,7 +407,7 @@ def main(
 
     x, y = monthly_day_num
 
-    page = 0
+    page = 1
     last_month = None
     # Add month numbers with links.
     for i in range(date_days):
@@ -392,7 +441,7 @@ def main(
                     a += 1
 
             # Only prepend dates in the date range to avoid key errors.
-            if page > 1:
+            if page > 2:
                 # Back fill leading dates from last month up to start of
                 # new month.
                 for n in range(a, 0, -1):
@@ -527,7 +576,7 @@ def main(
                 # which fit perfectly in 3 weeks.
                 a = 0
                 b += 1
-            if page > 0:
+            if page > 1:
                 for n in range(35 - (a + b * 7)):
                     # Don't ask. I forgot.
                     pdf.set_xy(
@@ -617,7 +666,7 @@ def main(
         i = 0
         # Embrace the recursion (I know. It's bad)
         for p in range(len(month_links)):
-            pdf.page = p + 1
+            pdf.page = p + 2
             # Limit range of months to 12 since this is the
             # most we can fit in the side bar.
             display_range = month_links[i: 12+i]
@@ -655,7 +704,6 @@ def main(
                         x + 1.5,
                         y + ((5.5 * 2) * (d + 1)) + fix_font_y_pos[14]
                     )
-
                 pdf.cell(width, text=text, align='C', link=link)
 
             if any([
@@ -754,7 +802,7 @@ if __name__ == '__main__':
     )
 
     parser = argparse.ArgumentParser(
-        description='Remarkable 2 calender creator'
+        description='Remarkable 2 calendar creator'
     )
     parser.add_argument('--start-date', default=start_date)
     parser.add_argument('--end-date', default=end_date)
