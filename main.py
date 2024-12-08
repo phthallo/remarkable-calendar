@@ -73,9 +73,10 @@ def main(
     monthly_day_num = (toolbar + grid_start[0] + 3, grid_start[1] + 3)
     monthly_day_event = (toolbar + grid_start[0], grid_start[1] + 8)
 
-    # title 
+    # x, y for stated year on title 
     title_year_range = (toolbar+20, 50.48600)
     title = (toolbar+20, 64.48600)
+    # x, y for separator line on title page
     title_header_sep = (toolbar+20, 60.48600)
 
     # Dumb fix for text y position not matching my Inkscape draft
@@ -131,7 +132,7 @@ def main(
     pdf.set_font(font_family, font_style, 42)
 
 
-    # generate title page
+    # Generate title page
     pdf.add_page()
 
     year_start = date_start.strftime('%Y')
@@ -145,7 +146,6 @@ def main(
     pdf.set_line_width(0.5)
 
     x, y = title_header_sep
-    # 50 mm long
     pdf.line(
         x,
         y,
@@ -154,7 +154,7 @@ def main(
     )
 
 
-    # title
+    # Title
     pdf.set_font_size(42)
     pdf.set_text_color(color_text)
 
